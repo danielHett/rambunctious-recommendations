@@ -39,3 +39,29 @@ size_t BigramModel::GetCount(string w) {
 
   return total;
 }
+
+string BigramModel::EstimateNextWord(string previous_text) {
+  istringstream sentence(previous_text);
+  string last_word;
+
+  do {
+    sentence >> last_word;
+  } while (sentence);
+
+  // TODO: We need a way to deal with words we don't have in model (UNK token?).
+  size_t denominator = GetCount(last_word);
+  map<string, size_t> bigrams = bigram_counts_.at(last_word);
+  string most_likely_token;
+  double highest_probability = 0;
+
+  for (std::map<string,size_t>::iterator it=bigrams.begin(); it!=bigrams.end(); ++it) {
+    double probability = (double)it->second / (double)denominator;
+
+    if (probability > highest_probability) {
+      most_likely_token = it->first;
+      highest_probability = probability;
+    }
+  }
+
+  return most_likely_token;
+}
